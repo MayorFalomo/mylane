@@ -1,6 +1,6 @@
 # Company Profiles App
 
-This is a web application built with **FastAPI** (Python backend), **HTMX** (frontend interactivity), and **ECharts** (data visualization). It allows users to select a company and view its profile, along with visualizations of role distributions across states and job families.
+This is a web application built with **FastAPI** (Python backend), **HTMX** (frontend interactivity), and **ECharts** (data visualization). It allows users to select a company and view its profile, along with roles distribution visualizations across states.
 
 ---
 
@@ -66,6 +66,7 @@ Place your CSV files (`company_attributes.csv`, `job_post_by_job_family.csv`, `j
 Start the FastAPI server using Uvicorn:
 
 ```bash
+venv\Scripts\activate
 uvicorn main:app --reload
 ```
 
@@ -89,6 +90,7 @@ http://127.0.0.1:8000
 ```
 company-profiles-app/
 ├── static/
+│   ├── Google.png
 │   ├── data/
 │   │   ├── company_attributes.csv
 │   │   ├── job_post_by_job_family.csv
@@ -97,6 +99,7 @@ company-profiles-app/
 │       └── styles.css
 ├── templates/
 │   └── index.html
+│   └── company-profile.html
 ├── main.py
 └── README.md
 ```
