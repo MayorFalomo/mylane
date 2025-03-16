@@ -41,101 +41,92 @@
         </div>
     </div>
 
-     <script>
-        // Initialize ECharts for the chart
-        const barChart = echarts.init(document.getElementById('main-chart'));
-        const pieChart = echarts.init(document.getElementById('pie-chart'));
-
-        // Function to fetch data and render the charts
-        async function fetchDataAndRenderChart() {
-            const companyId = document.getElementById('company-select').value;
-            if (!companyId) return;
-
-            try {
-                // Fetch data from the backend
-                const response = await fetch(`/data/distribution/${companyId}`);
-                const data = await response.json();
-
-                // Render the bar chart
-                renderBarChart(data);
-
-                // Render the pie chart
-                renderPieChart(data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
+<script>
+    async function fetchDataAndRenderChart() {
+        const companyId = document.getElementById('company-select').value;
+        if (!companyId) {
+            document.getElementById('company-profile').innerHTML = '<p>Select a company to see its profile.</p>';
+            return;
         }
+        console.log(companyId, 'com[panyOd]');
+        
 
-        // Function to render the bar chart
-        function renderBarChart(data) {
-            const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: {
-                        type: 'shadow'
-                    }
-                },
-             
-        //         legend: {
-        //             data: data.job_families,
-        //             top: 200, // Move the legend further down
-        // itemGap: 20
-        //         },
-                xAxis: {
-                    type: 'category',
-                    data: data.states,
-                    axisLabel: {
-                        rotate: 45,
-                        fontSize: 12
-                    }
-                },
-                yAxis: {
-                    type: 'value',
-                    name: 'Number of Roles'
-                },
-                series: data.series
-            };
+        try {
+            // Fetch company profile
+            const profileResponse = await fetch(`/company/${companyId}`);
+            const profileData = await profileResponse.text();
+            document.getElementById('company-profile').innerHTML = profileData;
 
-            barChart.setOption(option);
+            const distributionResponse = await fetch(`/data/distribution/${companyId}`);
+            const distributionData = await distributionResponse.json();
+
+            // Render Bar Chart
+            renderBarChart(distributionData.series, distributionData.states, companyId)
+
+            // Render Pie Charts
+            renderPieChart(distributionData.pie_roles_data, 'pie-chart', 'Role Distribution by Job Family', companyId);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            document.getElementById('company-profile').innerHTML = '<p>Error fetching company profile.</p>';
         }
+    }
 
-        // Function to render the pie chart
-        function renderPieChart(data) {
-            const option = {
-                tooltip: {
-                    trigger: 'item'
+    function renderBarChart(seriesData, states, id) {
+        const chartDom = document.getElementById('main-chart');
+        const myChart = echarts.init(chartDom);
+
+        const option = {
+            title: {
+                text: `Role and City Distribution of company with ID: ${id} `,
+            },
+            tooltip: {},
+           
+            xAxis: {
+                type: 'category',
+                data: states,
+            },
+            yAxis: {
+                type: 'value',
+            },
+            series: seriesData,
+        };
+
+        myChart.setOption(option);
+    }
+
+    function renderPieChart(pieData, chartId, title, id) {
+        const chartDom = document.getElementById(chartId);
+        const myChart = echarts.init(chartDom);
+
+        const option = {
+            title: {
+                text: `${title} for company with ID: ${id}`,
+                left: 'left',
+            },
+            tooltip: {
+                trigger: 'item',
+            },
+            series: [
+                {
+                    name: title,
+                    type: 'pie',
+                    radius: '50%',
+                    data: pieData,
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                        },
+                    },
+                    animation: true,
                 },
-                legend: {
-                    orient: 'vertical',
-                    left: 'left',
-                    right: 300,
-                },
-                series: [
-                    {
-                        name: 'Roles by Job Family',
-                        type: 'pie',
-                        radius: '50%',
-                        data: data.pie_data,
-                        emphasis: {
-                            itemStyle: {
-                                shadowBlur: 10,
-                                shadowOffsetX: 0,
-                                shadowColor: 'rgba(0, 0, 0, 0.5)'
-                            }
-                        }
-                    }
-                ]
-            };
+            ],
+        };
 
-            pieChart.setOption(option);
-        }
+        myChart.setOption(option);
+    }
+</script>
 
-        // HTMX event listener to fetch and render the charts when the company profile is loaded
-        document.body.addEventListener('htmx:afterSwap', function (event) {
-            if (event.detail.target.id === 'company-profile') {
-                fetchDataAndRenderChart();
-            }
-        });
-    </script>
 </body>
 </html>
