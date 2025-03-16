@@ -1,0 +1,30 @@
+<div class="flex item-start max-w-[500px] mx-auto " >
+
+    <div class="shadow-lg px-4 py-4 rounded-[10px] mx-auto" >
+        <div class="flex justify-between gap-[30px]" >
+      <div class="flex item-start gap-3" >
+            <div class="w-[50px] h-[50px] p-1 bg-[#F3F3FF] " >
+                <img class="w-full h-full object-cover" src="/static/google.png" alt="img" />
+            </div>
+            <div class="flex flex-col" >
+                <h2 class="scroll-m-20 text-[18px] text-black font-medium tracking-tight" >{{ company['company_name'] }}</h2>
+                    <span>{{ company['city'] }} , {{ company['state'] }}</span>
+            </div>
+        </div>
+        <h3>2500USD -3000USD </h3>
+        </div>
+    
+        <div class="flex flex-col gap-2" >
+            <p class="mt-3" >{{ company['industry_list'].replace('{', '').replace('}', '') }}</p>
+            <p> {{ company['description'] }}.</p>
+            <span class="bg-green-100 text-green-800 w-fit text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-green-900 dark:text-green-300">Hiring</span>
+            <div class="flex item-center justify-between" >
+            <div class="flex item-center gap-2" >
+                <p class="hover underline" ><a href="http://{{ company['website'] }}">website</a></p>
+                <p class="hover:underline" > <a href="http://{{ company['website'] }}">Linkedin</a></p>
+            </div>
+                <p class=" hover:text-blue-400 cursor pointer capitalize underline" >See more on {{ company['company_name'] }} </p>
+            </div>
+        </div>
+</div>
+</div>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Profiles</title>
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+</head>
+<body>
+    <h1 class="text-3xl font-bold mb-4">Company Profiles</h1>
+
+    <div class="max-w-sm mx-auto mb-4">
+        <label for="company-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select a Company:</label>
+        <select id="company-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onchange="fetchDataAndRenderChart()">
+            <option value="">-- Select a Company --</option>
+            {% for index, row in data.iterrows() %}
+                <option value="{{ row['company_id'] }}">{{ row['company_name'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="company-profile" class="mt-4">
+        <p>Select a company to see its profile.</p>
+    </div>
+
+    <!-- Container for the bar chart -->
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Role and City Distribution</h1>
+        <div id="chart-container" class="mt-[100px]">
+            <div id="main-chart" style="width: 100%; height: 700px;"></div>
+        </div>
+    </div>
+
+      <!-- Container for the pie chart -->
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Role Distribution by Job Family</h1>
+        <div id="pie-chart-container" class="mt-4">
+            <div id="pie-chart" style="width: 100%; height: 700px;"></div>
+        </div>
+    </div>
+
+     <script>
+        // Initialize ECharts for the chart
+        const barChart = echarts.init(document.getElementById('main-chart'));
+        const pieChart = echarts.init(document.getElementById('pie-chart'));
+
+        // Function to fetch data and render the charts
+        async function fetchDataAndRenderChart() {
+            const companyId = document.getElementById('company-select').value;
+            if (!companyId) return;
+
+            try {
+                // Fetch data from the backend
+                const response = await fetch(`/data/distribution/${companyId}`);
+                const data = await response.json();
+
+                // Render the bar chart
+                renderBarChart(data);
+
+                // Render the pie chart
+                renderPieChart(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Function to render the bar chart
+        function renderBarChart(data) {
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+             
+        //         legend: {
+        //             data: data.job_families,
+        //             top: 200, // Move the legend further down
+        // itemGap: 20
+        //         },
+                xAxis: {
+                    type: 'category',
+                    data: data.states,
+                    axisLabel: {
+                        rotate: 45,
+                        fontSize: 12
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Number of Roles'
+                },
+                series: data.series
+            };
+
+            barChart.setOption(option);
+        }
+
+        // Function to render the pie chart
+        function renderPieChart(data) {
+            const option = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    right: 300,
+                },
+                series: [
+                    {
+                        name: 'Roles by Job Family',
+                        type: 'pie',
+                        radius: '50%',
+                        data: data.pie_data,
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+
+            pieChart.setOption(option);
+        }
+
+        // HTMX event listener to fetch and render the charts when the company profile is loaded
+        document.body.addEventListener('htmx:afterSwap', function (event) {
+            if (event.detail.target.id === 'company-profile') {
+                fetchDataAndRenderChart();
+            }
+        });
+    </script>
+</body>
+</html>
