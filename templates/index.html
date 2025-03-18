@@ -48,13 +48,14 @@
             document.getElementById('company-profile').innerHTML = '<p>Select a company to see its profile.</p>';
             return;
         }
-        console.log(companyId, 'com[panyOd]');
-        
+        console.log(companyId, 'com[panyOd]');  
 
         try {
             // Fetch company profile
             const profileResponse = await fetch(`/company/${companyId}`);
             const profileData = await profileResponse.text();
+            console.log(profileData, 'profilData');
+            
             document.getElementById('company-profile').innerHTML = profileData;
 
             const distributionResponse = await fetch(`/data/distribution/${companyId}`);
