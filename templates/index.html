@@ -25,6 +25,8 @@
         <p>Select a company to see its profile.</p>
     </div>
 
+        <div id="error" class="mt-4 text-center text-red-600"></div>
+
     <!-- Container for the bar chart -->
     <div class="container mx-auto p-4">
         <h1 class="text-3xl font-bold mb-4">Role and City Distribution</h1>
@@ -40,6 +42,7 @@
             <div id="pie-chart" style="width: 100%; height: 700px;"></div>
         </div>
     </div>
+    
 
 <script>
     async function fetchDataAndRenderChart() {
@@ -48,23 +51,22 @@
             document.getElementById('company-profile').innerHTML = '<p>Select a company to see its profile.</p>';
             return;
         }
-        console.log(companyId, 'com[panyOd]');  
+        console.log(companyId, 'com[panyOd]');
+        
 
         try {
             // Fetch company profile
             const profileResponse = await fetch(`/company/${companyId}`);
             const profileData = await profileResponse.text();
-            console.log(profileData, 'profilData');
-            
             document.getElementById('company-profile').innerHTML = profileData;
 
             const distributionResponse = await fetch(`/data/distribution/${companyId}`);
             const distributionData = await distributionResponse.json();
 
-            // Render Bar Chart
-            renderBarChart(distributionData.series, distributionData.states, companyId)
+            // Function to run Bar Chart
+            renderBarChart(distributionData.states, distributionData.position_counts, companyId)
 
-            // Render Pie Charts
+            //Function to run Pie Chars
             renderPieChart(distributionData.pie_roles_data, 'pie-chart', 'Role Distribution by Job Family', companyId);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -72,16 +74,22 @@
         }
     }
 
-    function renderBarChart(seriesData, states, id) {
+   function renderBarChart(states, positionCounts, id) {
         const chartDom = document.getElementById('main-chart');
+        
+        if (!chartDom) {
+            console.error('Chart DOM element not found!');
+            return;
+        }
+
+        // Initialize ECharts instance
         const myChart = echarts.init(chartDom);
 
         const option = {
             title: {
-                text: `Role and City Distribution of company with ID: ${id} `,
+                text: `Role and City Distribution of company with ID: ${id}`,
             },
             tooltip: {},
-           
             xAxis: {
                 type: 'category',
                 data: states,
@@ -89,15 +97,34 @@
             yAxis: {
                 type: 'value',
             },
-            series: seriesData,
+            series: [
+                {
+                    name: 'Job Posts',
+                    type: 'bar',
+                    data: positionCounts,
+                    itemStyle: {
+                        color: '#3b82f6', // Blue color for bars
+                    },
+                },
+            ],
         };
 
         myChart.setOption(option);
+
+        myChart.resize();
     }
 
     function renderPieChart(pieData, chartId, title, id) {
         const chartDom = document.getElementById(chartId);
         const myChart = echarts.init(chartDom);
+                  const errorDiv = document.getElementById('error');
+
+
+if(!pieData) {
+      errorDiv.innerHTML = `<p>Error: Sorry, The Id Is not present in the Files</p>`;
+} else {
+    errorDiv.innerHTML = `<p> </p>`
+}
 
         const option = {
             title: {
